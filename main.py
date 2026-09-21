@@ -16,24 +16,56 @@ pygame.display.set_caption("Slime Pathfinder")
 grid = []
 for row in range(ROWS):
     grid.append([0] * COLS)
+
+start = None
+goal = None
 running = True
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = event.pos
+            col = x // CELL_WIDTH
+            row = y // CELL_HEIGHT
+            keys = pygame.key.get_pressed()
 
-        mouse_buttons = pygame.mouse.get_pressed()
+            if keys[pygame.K_s] and grid[row][col] != 3:
+                if start is not None:
+                    old_row, old_col = start
+                    grid[old_row][old_col] = 0
+                start = (row, col)
+                grid[row][col] = 2
 
-        if mouse_buttons[0] or mouse_buttons[2]:
+            elif keys[pygame.K_f] and grid[row][col] != 2:
+                if goal is not None:
+                    old_row, old_col = goal
+                    grid[old_row][old_col] = 0
+                goal = (row, col)
+                grid[row][col] = 3
+
+    mouse_buttons = pygame.mouse.get_pressed()
+    keys = pygame.key.get_pressed()
+
+    if (mouse_buttons[0] or mouse_buttons[2]) and not (
+        keys[pygame.K_s] or keys[pygame.K_f]
+        ):
             x, y = pygame.mouse.get_pos()
             col = x // CELL_WIDTH
             row = y // CELL_HEIGHT
 
             if 0 <= row < ROWS and 0 <= col < COLS:
                 if mouse_buttons[0]:
-                    grid[row][col] = 1
+                    if grid[row][col] not in (2, 3):
+                        grid[row][col] = 1
+
                 elif mouse_buttons[2]:
+                    if grid[row][col] == 2:
+                        start = None
+
+                    elif grid[row][col] == 3:
+                        goal = None
                     grid[row][col] = 0
 
     screen.fill("white")
@@ -49,6 +81,20 @@ while running:
                     "black",
                     (x, y, CELL_WIDTH, CELL_HEIGHT)
             )
+
+            elif grid[row][col] == 2:
+                pygame.draw.rect(
+                    screen,
+                    "green",
+                    (x, y, CELL_WIDTH, CELL_HEIGHT)
+                )
+
+            elif grid[row][col] == 3:
+                pygame.draw.rect(
+                    screen,
+                    "red",
+                    (x, y, CELL_WIDTH, CELL_HEIGHT)
+                )
 
             pygame.draw.rect(
                 screen,
