@@ -1,5 +1,5 @@
 import pygame
-
+from algorithms.bfs import bfs
 pygame.init()
 WIDTH = 800
 HEIGHT = 800
@@ -19,12 +19,21 @@ for row in range(ROWS):
 
 start = None
 goal = None
+path = None
 running = True
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                if start is not None and goal is not None:
+                    path = bfs(grid, start, goal)
+            elif event.key == pygame.K_r:
+                path = None
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             col = x // CELL_WIDTH
@@ -44,6 +53,7 @@ while running:
                     grid[old_row][old_col] = 0
                 goal = (row, col)
                 grid[row][col] = 3
+
 
     mouse_buttons = pygame.mouse.get_pressed()
     keys = pygame.key.get_pressed()
@@ -102,6 +112,28 @@ while running:
                 (x, y, CELL_WIDTH, CELL_HEIGHT),
                 1
             )
+
+    if path:
+        for row, col in path:
+            if (row, col) != start and (row, col) != goal:
+                x = col * CELL_WIDTH
+                y = row * CELL_HEIGHT
+
+                pygame.draw.rect(
+                    screen,
+                    "yellow",
+                    (x, y, CELL_WIDTH, CELL_HEIGHT)
+                )
+
+                pygame.draw.rect(
+                    screen,
+                    "gray",
+                    (x, y, CELL_WIDTH, CELL_HEIGHT),
+                    1
+                )
+
     pygame.display.flip()
 
 pygame.quit()
+
+
