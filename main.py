@@ -11,6 +11,7 @@ CELL_WIDTH = WIDTH // COLS
 CELL_HEIGHT = HEIGHT // ROWS
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
 pygame.display.set_caption("Slime Pathfinder")
 
 grid = []
@@ -19,7 +20,13 @@ for row in range(ROWS):
 
 start = None
 goal = None
+
 path = None
+explored = []
+
+explored_index = 0
+searching = False
+
 running = True
 
 while running:
@@ -30,9 +37,18 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 if start is not None and goal is not None:
-                    path = bfs(grid, start, goal)
+                    path, explored = bfs(grid, start, goal)
+
+                    explored_index = 0
+                    searching = True
+
+                    print("Path length:", len(path) if path else 0)
+                    print("Cells explored:", len(explored))
             elif event.key == pygame.K_r:
                 path = None
+                explored = []
+                explored_index = 0
+                searching = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
@@ -113,7 +129,32 @@ while running:
                 1
             )
 
-    if path:
+    if searching:
+        if explored_index < len(explored):
+            explored_index += 3
+        else:
+            searching = False
+
+    for row, col in explored[:explored_index]:
+        if (row,col) != start and (row,col) != goal:
+
+            x = col * CELL_WIDTH
+            y = row * CELL_HEIGHT
+
+            pygame.draw.rect(
+                screen,
+                "lightgreen",
+                (x,y, CELL_WIDTH, CELL_HEIGHT)
+            )
+
+            pygame.draw.rect(
+                screen,
+                "gray",
+                (x, y, CELL_WIDTH, CELL_HEIGHT),
+                1
+            )
+
+    if path and not searching:
         for row, col in path:
             if (row, col) != start and (row, col) != goal:
                 x = col * CELL_WIDTH
@@ -133,7 +174,7 @@ while running:
                 )
 
     pygame.display.flip()
-
+    clock.tick(30)
 pygame.quit()
 
 

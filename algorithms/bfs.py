@@ -3,6 +3,7 @@ from collections import deque
 def bfs(grid, start, goal):
     queue = deque([start])
     visited = {start}
+    explored = []
     parent = {}
 
     directions = [
@@ -13,7 +14,10 @@ def bfs(grid, start, goal):
             ]
     while queue:
         current = queue.popleft()
+        explored.append(current)
+
         row, col = current
+
         if current == goal:
             path = []
             while (current != start):
@@ -21,13 +25,13 @@ def bfs(grid, start, goal):
                 current = parent[current]
             path.append(current)
             path.reverse()
-            return path
+            return path, explored
         for row_change, col_change in directions:
             new_row = row + row_change
             new_col = col + col_change
 
             if (
-                  0 <= new_row < len(grid) 
+                  0 <= new_row < len(grid)
                   and 0 <= new_col < len(grid[0])
                   ):
                 if grid[new_row][new_col] != 1:
@@ -36,5 +40,5 @@ def bfs(grid, start, goal):
                         visited.add(neighbour)
                         queue.append(neighbour)
                         parent[neighbour] = current
-                    
-    return None
+
+    return None, explored
